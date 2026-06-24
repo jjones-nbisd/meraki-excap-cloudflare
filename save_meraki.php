@@ -1,7 +1,7 @@
 <?php
 $data = json_decode(file_get_contents("php://input"), true);
 
-$file = "meraki_guest_data.csv";
+$file = "http://policies.nbschools.net/meraki_guest_data.csv";
 
 $fields = [
     date("c"),
