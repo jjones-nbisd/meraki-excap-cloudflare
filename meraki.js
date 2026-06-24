@@ -15,7 +15,7 @@ function authUser() {
   let loginUrl = base_grant_url;
 
   if (user_continue_url && user_continue_url !== "undefined") {
-    loginUrl += "?continue_url=" + encodeURIComponent(user_continue_url);
+    loginUrl += "?continue_url=" + encodeURIComponent("https://nbschools.net");
   }
 
   window.location.href = loginUrl;
