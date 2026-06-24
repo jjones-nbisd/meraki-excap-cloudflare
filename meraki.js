@@ -34,8 +34,13 @@ function authUser(){
   var loginUrl = base_grant_url;
 
   // Check if user continue URL is defined
-  if(user_continue_url !== "undefined")
-      loginUrl += "?continue_url=" + user_continue_url;
+  if (typeof user_continue_url !== 'undefined' &&
+    user_continue_url)
+
+    loginUrl += (loginUrl.includes('?') ? '&' : '?') +
+            'continue_url=' +
+            encodeURIComponent(user_continue_url);
+}
   
   // Redirect user to Meraki auth URL
   window.location.href = loginUrl;
