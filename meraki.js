@@ -29,9 +29,6 @@ console.log("node_mac: " + node_mac);
 console.log("client_ip: " + client_ip);
 console.log("client_mac: " + client_mac);
 
-
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrnJD5DU7gCVDD6S0fYZi6Evj7W2pxNf6Y43zfJFOgHEV2IDHQ5dgCEbQr6tri1IjaFw/exec";
-
 // Function to redirect user to Meraki auth URL
 function authUser(){
   var loginUrl = base_grant_url;
@@ -45,34 +42,34 @@ function authUser(){
 }
 
 // Function to store user entered data and start auth
-function login(){
-const data = {
+async function login(){
+
+  const data = {
     timestamp: new Date().toISOString(),
-    client_ip,
-    client_mac,
-	node_mac,
- };
- 
-fetch(GOOGLE_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  }).finally(() => {
-    authUser();
-  });
+    base_grant_url: base_grant_url,
+    user_continue_url: user_continue_url,
+    node_mac: node_mac,
+    client_ip: client_ip,
+    client_mac: client_mac
+  };
+
+  try {
+    await fetch("save_meraki.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+  } catch (error) {
+    console.error("Failed to save Meraki data:", error);
+  }
 
   // Start user auth to Meraki
-  authUser(){
-    var loginUrl = base_grant_url;
-
-    if(user_continue_url !== "undefined")
-        loginUrl += "?continue_url=" + user_continue_url;
-
-    window.location.href = loginUrl;
+  authUser();
 }
 
 // Add click listener to continue button to login user
-document.getElementById('continue-btn').onclick = function() {login()}
+document.getElementById('continue-btn').onclick = function() {
+  login();
+};
