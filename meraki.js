@@ -16,8 +16,8 @@ function GetURLParameter(sParam)
 }
 
 // Parse URL parameters for Meraki appended items
-var base_grant_url = decodeURIComponent(GetURLParameter("base_grant_url"));
-var user_continue_url = decodeURIComponent(GetURLParameter("user_continue_url"));
+var base_grant_url = decodeURIComponent(GetURLParameter("base_grant_url") || "");
+var user_continue_url = decodeURIComponent(GetURLParameter("user_continue_url") || "");
 var node_mac = GetURLParameter("node_mac");
 var client_ip = GetURLParameter("client_ip");
 var client_mac = GetURLParameter("client_mac");
@@ -30,20 +30,27 @@ console.log("client_ip: " + client_ip);
 console.log("client_mac: " + client_mac);
 
 // Function to redirect user to Meraki auth URL
-function authUser(){
+function authUser() {
   var loginUrl = base_grant_url;
 
-  // Check if user continue URL is defined
-  if(user_continue_url !== "undefined")
-      loginUrl += "?continue_url=" + user_continue_url;
-  
-  // Redirect user to Meraki auth URL
+// Check if user continue URL is defined
+  if (!loginUrl) {
+    console.error("Missing base_grant_url. Cannot authenticate user.");
+    return;
+  }
+
+  if (typeof user_continue_url !== 'undefined' && user_continue_url) {
+    loginUrl += (loginUrl.includes('?') ? '&' : '?') +
+                'continue_url=' +
+                encodeURIComponent(user_continue_url);
+  }
+
+// Redirect user to Meraki auth URL
   window.location.href = loginUrl;
 }
 
 // Function to store user entered data and start auth
-async function login(){
-
+async function login() {
   const data = {
     timestamp: new Date().toISOString(),
     base_grant_url: base_grant_url,
@@ -54,18 +61,21 @@ async function login(){
   };
 
   try {
-    await fetch("save_meraki.php", {
+    const response = await fetch("save_meraki.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(data)
     });
+
+    if (!response.ok) {
+      console.error("Failed to save Meraki data:", response.status);
+    }
   } catch (error) {
     console.error("Failed to save Meraki data:", error);
   }
 
-  // Start user auth to Meraki
   authUser();
 }
 
